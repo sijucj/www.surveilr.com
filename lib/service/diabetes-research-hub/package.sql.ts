@@ -77,12 +77,14 @@ export class DrhShellSqlPages extends sh.ShellSqlPages {
         items.map((item) => `${literal(JSON.stringify(item))} AS ${key}`),
       javascript: (key: string, scripts: string[]) => {
         const items = scripts.map((s) => `${literal(s)} AS ${key}`);
+        items.push(
+          selectNavMenuItems("/drh/study/", "Study"),
+        );
         items.push(selectNavMenuItems("/ur", "Uniform Resource"));
         items.push(selectNavMenuItems("/console", "Console"));
         items.push(
           selectNavMenuItems("/orchestration", "Orchestration"),
-        );
-        // items.push(selectNavMenuItems("/site", "DRH"));
+        );        
         items.push(
           selectNavMenuItems("https://drh.diabetestechnology.org/", "DRH Home","__blank"),
         );
@@ -133,13 +135,7 @@ export class DRHSqlPages extends spn.TypicalSqlPageNotebook {
   `;
   }
 
-  menuDDL() {
-    return this.SQL`
-  INSERT OR IGNORE INTO sqlpage_aide_navigation ("path", caption, namespace, parent_path, sibling_order, url, title, abbreviated_caption, description,elaboration) VALUES
-  (NULL, 'DRH Home', 'prime', '/external', 1, 'https://drh.diabetestechnology.org/', NULL, NULL, NULL,'{ "target": "_blank" }'),
-  (NULL, 'DTS Home', 'prime', '/external', 1, 'https://www.diabetestechnology.org/', NULL, NULL, NULL,'{ "target": "_blank" }')
-  `;
-  }
+  
 
   @spn.navigationPrimeTopLevel({
     caption: "DRH EDGE UI Home",
@@ -314,6 +310,51 @@ export class DRHSqlPages extends spn.TypicalSqlPageNotebook {
 
 
    `;
+  }
+
+  @drhNav({
+    caption: "Study and Participant Information",
+    abbreviatedCaption: "Study and Participant Information",
+    description: "Study and Participant Information",
+    siblingOrder: 5,
+  })
+  "drh/study/index.sql"() {
+    const viewName = `drh_participant_data`;
+    const pagination = this.pagination({ tableOrViewName: viewName });
+    return this.SQL`
+  ${this.activePageTitle()}
+    SELECT
+  'text' as component,
+    '
+    In Continuous Glucose Monitoring (CGM) research, studies are designed to evaluate the effectiveness, accuracy, and impact of CGM systems on diabetes management. Each study aims to gather comprehensive data on glucose levels, treatment efficacy, and patient outcomes to advance our understanding of diabetes care.
+
+    ### Study Details
+
+    - **Study ID**: A unique identifier assigned to each study.
+    - **Study Name**: The name or title of the study.
+    - **Start Date**: The date when the study begins.
+    - **End Date**: The date when the study concludes.
+    - **Treatment Modalities**: Different treatment methods or interventions used in the study.
+    - **Funding Source**: The source(s) of financial support for the study.
+    - **NCT Number**: ClinicalTrials.gov identifier for the study.
+    - **Study Description**: A description of the study’s objectives, methodology, and scope.
+
+    ' as contents_md;
+
+    SELECT 'table' as component, 1 as search, 1 as sort, 1 as hover, 1 as striped_rows,'study_id' as markdown;
+    SELECT 
+      format('[%s](/drh/study-participant-dashboard/index.sql?study_id=%s)',study_id, study_id) as study_id,      
+      study_name,
+      start_date,
+      end_date,
+      treatment_modalities,
+      funding_source,
+      nct_number,
+      study_description  
+    from drh_study_data;
+
+
+      `;
   }
 
   @drhNav({
@@ -726,23 +767,77 @@ select
       ' ' AS description
   
 
-  SELECT
-     'card'     as component,
-     '' as title,
-      2         as columns;
-
-  SELECT
-     'GLUCOSE STATISTICS AND TARGETS' AS title,
-     '' AS description
-  FROM
-      drh_study_vanity_metrics_details;
-
-  SELECT
-
-      'Goals for Type 1 and Type 2 Diabetes' AS title,
-     '' AS description
-  FROM
-    drh_number_cgm_count;
+ 
+  select 
+    'html' as component;
+    select 
+    '<div class="row gx-2 gy-2 mt-1 mb-3 row-cols-lg-2 ">
+        <div class="">
+        <div class="card h-100">
+           <div class="card-body">
+                    <h2 class="card-title fs-3 me-3">GLUCOSE STATISTICS AND TARGETS</h2>  
+                    <div class="card-content my-1">November 02, 2017 - February 23, 2018 <span style="float: right;">113 days</span></div>   
+                    <div class="card-content my-1"><b>Time CGM Active</b> <span style="float: right;"><b>87.61</b> %</span></div>  
+                    <div class="card-content my-1"><b>Number of Days CGM Worn</b> <span style="float: right;"><b>99</b> days</span></div> 
+                    <div class="card-body" style="background-color: lightgray;border: 1px solid black;">
+                      <div class="table-responsive">
+                        <table class="table">                           
+                           <tbody class="table-tbody list">
+                           <tr>
+                                <th colspan="2" style="text-align: center;">
+                                  Ranges And Targets For Type 1 or Type 2 Diabetes
+                                </th>
+                              </tr>
+                              <tr>
+                                <th >
+                                  Glucose Ranges
+                                </th>
+                                <th>
+                                  Targets % of Readings (Time/Day)
+                                </th>
+                              </tr>
+                              <tr>
+                                <td>Target Range 70-180 mg/dL</td>
+                                <td>Greater than 70% (16h 48min)</td>
+                              </tr>
+                              <tr>
+                                <td>Below 70 mg/dL</td>
+                                <td>Less than 4% (58min)</td>
+                              </tr>
+                              <tr>
+                                <td>Below 54 mg/dL</td>
+                                <td>Less than 1% (14min)</td>
+                              </tr>
+                              <tr>
+                                <td>Above 180 mg/dL</td>
+                                <td>Less than 25% (6h)</td>
+                              </tr>
+                              <tr>
+                                <td>Above 250 mg/dL</td>
+                                <td>Less than 5% (1h 12min)</td>
+                              </tr>
+                              <tr>
+                                <td colspan="2">Each 5% increase in time in range (70-180 mg/dL) is clinically beneficial.</td>                                
+                              </tr>
+                           </tbody>
+                        </table>
+                      </div>
+                    </div>
+                    <div class="card-content my-1"><b>Mean Glucose</b> <span style="float: right;"><b>133.27</b> mg/dL</span></div>                           
+                    <div class="card-content my-1"><b>Glucose Management Indicator (GMI)</b> <span style="float: right;"><b>115.66</b> %</span></div>                           
+                    <div class="card-content my-1"><b>Glucose Variability</b> <span style="float: right;"><b>28.65</b> %</span></div>                           
+                    <div class="card-content my-1">Defined as percent coefficient of variation (%CV); target ≤36%</div>                           
+            </div>
+        </div>
+        </div>
+        <div class="">
+        <div class="card h-100">
+           <div class="card-body">
+                    <h2 class="card-title fs-3 me-3">Goals for Type 1 and Type 2 Diabetes</h2>                    
+            </div>
+        </div>
+        </div>
+    </div>' as html;
 
   `;
   }
