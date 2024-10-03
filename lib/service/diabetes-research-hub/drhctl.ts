@@ -11,7 +11,7 @@ import {
 
 // Detect platform-specific command format
 const isWindows = Deno.build.os === "windows";
-const toolCmd = isWindows ? ".\\surveilr" : "./surveilr";
+const toolCmd = isWindows ? ".\\surveilr" : "surveilr";
 
 const RSC_BASE_URL =
   "https://raw.githubusercontent.com/surveilr/www.surveilr.com/main/lib/service/diabetes-research-hub";
@@ -142,7 +142,7 @@ try {
   );
   vvSQL = await fetchSqlContent(
     `${RSC_BASE_URL}/verfication-validation/orchestrate-drh-vv.sql`,
-  );  
+  );
   uxSQL = await fetchUxSqlContent(); // Fetch UX SQL content
 } catch (error) {
   console.error(
