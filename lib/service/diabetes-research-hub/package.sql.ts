@@ -24,7 +24,7 @@ export class DrhShellSqlPages extends sh.ShellSqlPages {
     shellConfig.image =
       "https://drh.diabetestechnology.org/images/diabetic-research-hub-logo.png";
     shellConfig.icon = "";
-    shellConfig.link = "/drh/";
+    shellConfig.link = "/";
     return shellConfig;
   }
 
@@ -709,7 +709,7 @@ ${pagination.renderSimpleMarkdown()}
     SELECT 
      'The Participants Detail page is a comprehensive report that includes glucose statistics, such as the Ambulatory Glucose Profile (AGP), Glycemia Risk Index (GRI), Daily Glucose Profile, and all other metrics data.' as description;
   
-select 
+/*select 
     'form'            as component,
     'Filter by Date Range'   as title,
     'Submit' as validate,    
@@ -725,7 +725,7 @@ select
     'End Date' as label,
     '2018-02-23'  as value,
     'date'       as type,
-    6             as width;
+    6             as width;*/ 
 
 
 
@@ -788,7 +788,8 @@ select
         <div class="card h-100">
            <div class="card-body">
                     <h2 class="card-title fs-3 me-3">GLUCOSE STATISTICS AND TARGETS</h2>  
-                    <div class="card-content my-1">November 02, 2017 - February 23, 2018 <span style="float: right;">113 days</span></div>   
+                    <div class="card-content my-1">
+                    November 02, 2017 - February 23, 2018 <span style="float: right;">113 days</span></div>   
                     <div class="card-content my-1"><b>Time CGM Active</b> <span style="float: right;"><b>87.61</b> %</span></div>  
                     <div class="card-content my-1"><b>Number of Days CGM Worn</b> <span style="float: right;"><b>99</b> days</span></div> 
                     <div class="card-body" style="background-color: lightgray;border: 1px solid black;">
@@ -849,7 +850,7 @@ select
             </div>
         </div>
         </div>
-    </div>' as html;
+    </div>' as html;  
 
   `;
   }
