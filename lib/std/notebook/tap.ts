@@ -171,7 +171,7 @@ export class AssertThat<ColumnName extends string>
       WITH test_case AS (
         ${this.body}
       )
-      ${this.cases.map((tc, subTcIndex) => tc.selectCaseExpr(this.cases.length > 1 ? `${this.ctx.index}.${subTcIndex+1}` : String(this.ctx.index)).SQL(this.emitCtx)).join("\nUNION ALL\n")}
+      ${this.cases.map((tc, subTcIndex) => tc.selectCaseExpr(this.cases.length > 1 ? `${this.ctx.index}.${subTcIndex + 1}` : String(this.ctx.index)).SQL(this.emitCtx)).join("\nUNION ALL\n")}
     )`;
   }
 
@@ -409,6 +409,7 @@ export class TestSuiteNotebook
     return [
       ...arbitrarySqlStmts,
       ...testCases.filter((tc) => !SQLa.isSqlTextSupplier(tc.body)).map(tc => `-- Test Case "${tc.name}" did not return SqlTextSupplier instance (is ${typeof tc.body} instead)`),
+      `DROP VIEW IF EXISTS "${viewName}";`,
       `CREATE VIEW "${viewName}" AS`,
       `    WITH`,
       `        tap_version AS (SELECT 'TAP version 14' AS ${tapResultColName}),`,
