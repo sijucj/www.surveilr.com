@@ -1,13 +1,10 @@
 import { DB } from "https://deno.land/x/sqlite/mod.ts";
 
-// Path to your existing SQLite database
-const dbFilePath = "resource-surveillance.sqlite.db";
-
-// Function to create a combined view of CGM tracing
-
+// Function to create the combined CGM tracing view
+export function createCombinedCGMView(dbFilePath: string): void {
   // Open the existing database
   const db = new DB(dbFilePath);
-  console.log(`Opened database: ${dbFilePath}`);
+  //console.log(`Opened database: ${dbFilePath}`);
 
   // Create error log table if it doesn't exist
   db.execute(`
@@ -17,7 +14,7 @@ const dbFilePath = "resource-surveillance.sqlite.db";
       error_message TEXT
     );
   `);
-  console.log("Error log table created or already exists.");
+  //console.log("Error log table created or already exists.");
 
   // Drop the view if it exists and create it
   try {
@@ -32,14 +29,14 @@ const dbFilePath = "resource-surveillance.sqlite.db";
       GROUP BY
         patient_id;
     `);
-    console.log("View 'drh_participant_file_names' created successfully.");
+    //console.log("View 'drh_participant_file_names' created successfully.");
   } catch (error) {
     console.error("Error creating view 'drh_participant_file_names':", error);
     const sqlQuery = "INSERT INTO error_log (error_message) VALUES (?);";
     const params = JSON.stringify({ message: error.message });
     db.execute(sqlQuery, [params]);
     db.close();
-    return; // Exit if there's an error creating the view
+    return;
   }
 
   // Get the list of participant IDs from the view
@@ -49,12 +46,8 @@ const dbFilePath = "resource-surveillance.sqlite.db";
   const sqlParts: string[] = [];
 
   for (const [patient_id_raw] of participants) {
-    // Cast patient_id_raw to a string type
     const patient_id: string = patient_id_raw as string;
 
-    //console.log(`Processing participant: ${patient_id}`);
-
-    // Get the file names associated with the participant
     const [file_names_row] = db.query("SELECT file_names FROM drh_participant_file_names WHERE patient_id = ?", [patient_id]);
     if (!file_names_row) {
       console.log(`No file names found for participant ${patient_id}.`);
@@ -62,13 +55,8 @@ const dbFilePath = "resource-surveillance.sqlite.db";
     }
 
     const file_names = file_names_row[0];
-    //console.log(`File names for participant ${patient_id}: ${file_names}`);
-
     if (file_names) {
-      // Construct table names for the participant's data
       const participantTableNames = file_names.split(', ').map(fileName => `uniform_resource_${fileName}`);
-
-      // Add the SQL part for each participant's table
       participantTableNames.forEach(tableName => {
         sqlParts.push(`
           SELECT 
@@ -78,28 +66,25 @@ const dbFilePath = "resource-surveillance.sqlite.db";
           FROM ${tableName}
         `);
       });
-    } else {
-      console.log(`No file names found for participant ${patient_id}.`);
     }
   }
 
-  // Create the combined view for all participants
   if (sqlParts.length > 0) {
     const combinedUnionAllQuery = sqlParts.join(' UNION ALL ');
     const createCombinedViewSql = `CREATE VIEW IF NOT EXISTS combined_cgm_tracing AS ${combinedUnionAllQuery};`;
-    //console.log(`Creating combined view with SQL:\n${createCombinedViewSql}`);
-    
-    //return createCombinedViewSql;
-    db.execute(createCombinedViewSql);
-    // db.close();
 
+    db.execute(createCombinedViewSql);
     console.log("Combined view 'combined_cgm_tracing' created successfully.");
-    
   } else {
     console.log("No participant tables found, so the combined view will not be created.");
   }
 
-  // Close the database connection
- db.close();
-  console.log(`Closed database: ${dbFilePath}`);
+  db.close();
+  //console.log(`Closed database: ${dbFilePath}`);
+}
 
+// If the script is being run directly, execute the function
+if (import.meta.main) {
+  const dbFilePath = "resource-surveillance.sqlite.db"; 
+  createCombinedCGMView(dbFilePath);
+}
