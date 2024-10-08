@@ -362,7 +362,7 @@ export class DRHSqlPages extends spn.TypicalSqlPageNotebook {
       funding_source,
       nct_number,
       study_description  
-    from drh_study_data;
+    from drh_study;
 
 
       `;
@@ -780,19 +780,36 @@ select
   
 
  
-  select 
+  SELECT  
     'html' as component;
-    select 
+    SELECT  
     '<div class="row gx-2 gy-2 mt-1 mb-3 row-cols-lg-2 ">
         <div class="">
         <div class="card h-100">
            <div class="card-body">
                     <h2 class="card-title fs-3 me-3">GLUCOSE STATISTICS AND TARGETS</h2>  
-                    <div class="card-content my-1">
-                    November 02, 2017 - February 23, 2018 <span style="float: right;">113 days</span></div>   
-                    <div class="card-content my-1"><b>Time CGM Active</b> <span style="float: right;"><b>87.61</b> %</span></div>  
-                    <div class="card-content my-1"><b>Number of Days CGM Worn</b> <span style="float: right;"><b>99</b> days</span></div> 
-                    <div class="card-body" style="background-color: lightgray;border: 1px solid black;">
+                    <div class="card-content my-1">' as html;
+                 SELECT  
+                    strftime('%Y-%m-%d', cgm_start_date) || ' - ' ||  strftime('%Y-%m-%d', cgm_end_date) || ' <span style="float: right;">'|| CAST(julianday(cgm_end_date) - julianday(cgm_start_date) AS INTEGER) ||' days</span></div>' as html
+                  FROM  
+                    drh_participant_cgm_dates
+                  WHERE 
+                    participant_id = $participant_id;   
+                  SELECT  
+                    '<div class="card-content my-1"><b>Time CGM Active</b> <span style="float: right;"><b>' || percentage_active || '</b> %</span></div>' as html
+                  FROM
+                    drh_percentage_active_days  
+                  WHERE 
+                    participant_id = $participant_id; 
+                  SELECT  
+                    '<div class="card-content my-1"><b>Number of Days CGM Worn</b> <span style="float: right;"><b>'|| number_of_days_cgm_worn ||'</b> days</span></div>' as html 
+                  FROM
+                    drh_cgm_worn_days  
+                  WHERE 
+                    participant_id = $participant_id; 
+
+                  SELECT  
+                    '<div class="card-body" style="background-color: lightgray;border: 1px solid black;">
                       <div class="table-responsive">
                         <table class="table">                           
                            <tbody class="table-tbody list">
@@ -835,12 +852,31 @@ select
                            </tbody>
                         </table>
                       </div>
-                    </div>
-                    <div class="card-content my-1"><b>Mean Glucose</b> <span style="float: right;"><b>133.27</b> mg/dL</span></div>                           
-                    <div class="card-content my-1"><b>Glucose Management Indicator (GMI)</b> <span style="float: right;"><b>115.66</b> %</span></div>                           
-                    <div class="card-content my-1"><b>Glucose Variability</b> <span style="float: right;"><b>28.65</b> %</span></div>                           
-                    <div class="card-content my-1">Defined as percent coefficient of variation (%CV); target ≤36%</div>                           
-            </div>
+                    </div>' as html
+
+                  SELECT  
+                    '<div class="card-content my-1"><b>Mean Glucose</b> <span style="float: right;"><b>'|| mean_glucose ||'</b> mg/dL</span></div>' as html
+                  FROM
+                    drh_mean_glucose  
+                  WHERE 
+                    participant_id = $participant_id; 
+                           
+                  SELECT  
+                    '<div class="card-content my-1"><b>Glucose Management Indicator (GMI)</b> <span style="float: right;"><b>'|| gmi ||'</b> %</span></div>' as html                           
+                  FROM
+                    drh_glucose_management_indicator  
+                  WHERE 
+                    participant_id = $participant_id; 
+                  SELECT  
+                    '<div class="card-content my-1"><b>Glucose Variability</b> <span style="float: right;"><b>'|| coefficient_of_variation ||'</b> %</span></div>' as html     
+                  FROM
+                    drh_coefficient_of_variation  
+                  WHERE 
+                    participant_id = $participant_id;                                           
+                  SELECT  
+                    '<div class="card-content my-1">Defined as percent coefficient of variation (%CV); target ≤36%</div>' as html                           
+        SELECT  
+          '</div>
         </div>
         </div>
         <div class="">
