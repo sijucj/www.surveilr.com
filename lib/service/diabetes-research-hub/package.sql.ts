@@ -17,6 +17,13 @@ function drhNav(route: Omit<spn.RouteConfig, "path" | "parentPath">) {
   });
 }
 
+function drhNav2(route: Omit<spn.RouteConfig, "path" | "parentPath">) {
+  return spn.navigationPrime({
+    ...route,
+    parentPath: "/drh",
+  });
+}
+
 export class DrhShellSqlPages extends sh.ShellSqlPages {
   defaultShell() {
     const shellConfig = super.defaultShell();
@@ -777,39 +784,138 @@ select
   SELECT
       strftime('Generated: %Y-%m-%d %H:%M:%S', 'now') AS title,
       ' ' AS description
-  
-
  
-  SELECT  
+      
+    select 
+    'card' as component,    
+    2      as columns;
+select 
+    'GLUCOSE STATISTICS AND TARGETS' as title,
+    '/drh/gluecose-statistics-and-targets/index.sql?_sqlpage_embed&participant_id=' || $participant_id as embed; 
+select 
+    'Goals for Type 1 and Type 2 Diabetes' as title,
+    '/drh/goals-for-type-1-and-type-2-diabetes/index.sql?_sqlpage_embed&participant_id=' || $participant_id as embed;
+select 
+    'AMBULATORY GLUCOSE PROFILE (AGP)' as title,
+    '/drh/ambulatory-gluecose-profile/index.sql?_sqlpage_embed&participant_id=' || $participant_id as embed;  
+  `;
+  }
+
+  @drhNav({
+    caption: "Ambulatory glucose profile embeded page",
+    abbreviatedCaption: "Ambulatory glucose profile embeded page",
+    description: "Ambulatory glucose profile embeded page",
+    siblingOrder: 13,
+  })
+  @spn.shell({ breadcrumbsFromNavStmts: "no",shellStmts:"do-not-include" })
+  "drh/ambulatory-gluecose-profile/index.sql"() {    
+    return this.SQL`    
+    select 
+        'chart'   as component,
+        0         as ymin;
+    select 
+        'p5'              as series,        
+        CASE 
+        WHEN CAST(hour AS INTEGER) = 0 THEN '12 am'
+        WHEN CAST(hour AS INTEGER) = 12 THEN '12 pm'
+        WHEN CAST(hour AS INTEGER) < 12 THEN CAST(hour AS INTEGER) || ' am'
+        ELSE (CAST(hour AS INTEGER) - 12) || ' pm'
+        END AS x,
+        CAST(p5 AS INTEGER)  as value
+    from
+      drh_agp_metrics
+    where
+      participant_id = $participant_id; 
+    select 
+        'p25'              as series,
+        CASE 
+        WHEN CAST(hour AS INTEGER) = 0 THEN '12 am'
+        WHEN CAST(hour AS INTEGER) = 12 THEN '12 pm'
+        WHEN CAST(hour AS INTEGER) < 12 THEN CAST(hour AS INTEGER) || ' am'
+        ELSE (CAST(hour AS INTEGER) - 12) || ' pm'
+        END AS x,
+        CAST(p25 AS INTEGER)  as value
+    from
+      drh_agp_metrics
+    where
+      participant_id = $participant_id; 
+    select 
+        'p50'              as series,
+        CASE 
+        WHEN CAST(hour AS INTEGER) = 0 THEN '12 am'
+        WHEN CAST(hour AS INTEGER) = 12 THEN '12 pm'
+        WHEN CAST(hour AS INTEGER) < 12 THEN CAST(hour AS INTEGER) || ' am'
+        ELSE (CAST(hour AS INTEGER) - 12) || ' pm'
+        END AS x,
+        CAST(p50 AS INTEGER)  as value
+    from
+      drh_agp_metrics
+    where
+      participant_id = $participant_id; 
+    select 
+        'p75'              as series,
+        CASE 
+        WHEN CAST(hour AS INTEGER) = 0 THEN '12 am'
+        WHEN CAST(hour AS INTEGER) = 12 THEN '12 pm'
+        WHEN CAST(hour AS INTEGER) < 12 THEN CAST(hour AS INTEGER) || ' am'
+        ELSE (CAST(hour AS INTEGER) - 12) || ' pm'
+        END AS x,
+        CAST(p75 AS INTEGER)  as value
+    from
+      drh_agp_metrics
+    where
+      participant_id = $participant_id; 
+    select 
+        'p95'              as series,
+        CASE 
+        WHEN CAST(hour AS INTEGER) = 0 THEN '12 am'
+        WHEN CAST(hour AS INTEGER) = 12 THEN '12 pm'
+        WHEN CAST(hour AS INTEGER) < 12 THEN CAST(hour AS INTEGER) || ' am'
+        ELSE (CAST(hour AS INTEGER) - 12) || ' pm'
+        END AS x,
+       CAST(p95 AS INTEGER)  as value
+    from
+      drh_agp_metrics
+    where
+      participant_id = $participant_id; 
+    
+  `;
+  }
+  
+  @drhNav({
+    caption: "Gluecose Statistics and targets embeded page",
+    abbreviatedCaption: "Gluecose Statistics and targets embeded page",
+    description: "Gluecose Statistics and targets embeded page",
+    siblingOrder: 13,
+  })
+  @spn.shell({ breadcrumbsFromNavStmts: "no",shellStmts:"do-not-include" })
+  "drh/gluecose-statistics-and-targets/index.sql"() {    
+    return this.SQL`
+     SELECT  
     'html' as component;
     SELECT  
-    '<div class="row gx-2 gy-2 mt-1 mb-3 row-cols-lg-2 ">
-        <div class="">
-        <div class="card h-100">
-           <div class="card-body">
-                    <h2 class="card-title fs-3 me-3">GLUCOSE STATISTICS AND TARGETS</h2>  
-                    <div class="card-content my-1">' as html;
-                 SELECT  
-                    strftime('%Y-%m-%d', cgm_start_date) || ' - ' ||  strftime('%Y-%m-%d', cgm_end_date) || ' <span style="float: right;">'|| CAST(julianday(cgm_end_date) - julianday(cgm_start_date) AS INTEGER) ||' days</span></div>' as html
-                  FROM  
-                    drh_participant_cgm_dates
-                  WHERE 
-                    participant_id = $participant_id;   
-                  SELECT  
-                    '<div class="card-content my-1"><b>Time CGM Active</b> <span style="float: right;"><b>' || percentage_active || '</b> %</span></div>' as html
-                  FROM
-                    drh_percentage_active_days  
-                  WHERE 
-                    participant_id = $participant_id; 
-                  SELECT  
-                    '<div class="card-content my-1"><b>Number of Days CGM Worn</b> <span style="float: right;"><b>'|| number_of_days_cgm_worn ||'</b> days</span></div>' as html 
-                  FROM
-                    drh_cgm_worn_days  
-                  WHERE 
-                    participant_id = $participant_id; 
+      '<div class="card-content my-1">'|| strftime('%Y-%m-%d', cgm_start_date) || ' - ' ||  strftime('%Y-%m-%d', cgm_end_date) || ' <span style="float: right;">'|| CAST(julianday(cgm_end_date) - julianday(cgm_start_date) AS INTEGER) ||' days</span></div>' as html
+    FROM  
+        drh_participant_cgm_dates
+    WHERE 
+        participant_id = $participant_id;
 
-                  SELECT  
-                    '<div class="card-body" style="background-color: lightgray;border: 1px solid black;">
+    SELECT  
+      '<div class="card-content my-1"><b>Time CGM Active</b> <span style="float: right;"><b>' || percentage_active || '</b> %</span></div>' as html
+    FROM
+      drh_percentage_active_days  
+    WHERE 
+      participant_id = $participant_id; 
+
+    SELECT  
+      '<div class="card-content my-1"><b>Number of Days CGM Worn</b> <span style="float: right;"><b>'|| number_of_days_cgm_worn ||'</b> days</span></div>' as html
+    FROM
+        drh_cgm_worn_days  
+    WHERE 
+        participant_id = $participant_id; 
+
+    SELECT  
+      '<div class="card-body" style="background-color: lightgray;border: 1px solid black;">
                       <div class="table-responsive">
                         <table class="table">                           
                            <tbody class="table-tbody list">
@@ -819,7 +925,7 @@ select
                                 </th>
                               </tr>
                               <tr>
-                                <th >
+                                <th>
                                   Glucose Ranges
                                 </th>
                                 <th>
@@ -852,42 +958,48 @@ select
                            </tbody>
                         </table>
                       </div>
-                    </div>' as html
+                    </div>' as html; 
 
-                  SELECT  
-                    '<div class="card-content my-1"><b>Mean Glucose</b> <span style="float: right;"><b>'|| mean_glucose ||'</b> mg/dL</span></div>' as html
-                  FROM
-                    drh_mean_glucose  
-                  WHERE 
-                    participant_id = $participant_id; 
-                           
-                  SELECT  
-                    '<div class="card-content my-1"><b>Glucose Management Indicator (GMI)</b> <span style="float: right;"><b>'|| gmi ||'</b> %</span></div>' as html                           
-                  FROM
-                    drh_glucose_management_indicator  
-                  WHERE 
-                    participant_id = $participant_id; 
-                  SELECT  
-                    '<div class="card-content my-1"><b>Glucose Variability</b> <span style="float: right;"><b>'|| coefficient_of_variation ||'</b> %</span></div>' as html     
-                  FROM
-                    drh_coefficient_of_variation  
-                  WHERE 
-                    participant_id = $participant_id;                                           
-                  SELECT  
-                    '<div class="card-content my-1">Defined as percent coefficient of variation (%CV); target ≤36%</div>' as html                           
-        SELECT  
-          '</div>
-        </div>
-        </div>
-        <div class="">
-        <div class="card h-100">
-           <div class="card-body">
-                    <h2 class="card-title fs-3 me-3">Goals for Type 1 and Type 2 Diabetes</h2>                    
-            </div>
-        </div>
-        </div>
-    </div>' as html;  
+    SELECT  
+      '<div class="card-content my-1"><b>Mean Glucose</b> <span style="float: right;"><b>'|| mean_glucose ||'</b> mg/dL</span></div>' as html
+    FROM
+      drh_mean_glucose  
+    WHERE 
+      participant_id = $participant_id; 
 
+    SELECT  
+      '<div class="card-content my-1"><b>Glucose Management Indicator (GMI)</b> <span style="float: right;"><b>'|| gmi ||'</b> %</span></div>' as html
+    FROM
+      drh_glucose_management_indicator  
+    WHERE 
+      participant_id = $participant_id; 
+      
+    SELECT  
+      '<div class="card-content my-1"><b>Glucose Variability</b> <span style="float: right;"><b>'|| coefficient_of_variation ||'</b> %</span></div>' as html   
+    FROM
+      drh_coefficient_of_variation  
+    WHERE 
+      participant_id = $participant_id;  
+      
+    SELECT  
+      '<div class="card-content my-1">Defined as percent coefficient of variation (%CV); target ≤36%</div>' as html;                     
+    
+  `;
+  }
+
+  @drhNav({
+    caption: "Goals for Type 1 and Type 2 Diabetes embeded page",
+    abbreviatedCaption: "Goals for Type 1 and Type 2 Diabetes embeded page",
+    description: "Goals for Type 1 and Type 2 Diabetes embeded page",
+    siblingOrder: 13,
+  })
+  @spn.shell({ breadcrumbsFromNavStmts: "no",shellStmts:"do-not-include" })
+  "drh/goals-for-type-1-and-type-2-diabetes/index.sql"() {    
+    return this.SQL`
+     SELECT  
+    'html' as component;
+    SELECT  
+      '<div class="card-content my-1"></div>' as html; 
   `;
   }
 
