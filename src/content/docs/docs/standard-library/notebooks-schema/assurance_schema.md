@@ -1,5 +1,5 @@
 ---
-title: Assurance Schema
+title: assurance_schema
 description: Explanation of the `assurance_schema` 
 ---
 

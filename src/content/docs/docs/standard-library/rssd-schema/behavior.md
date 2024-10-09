@@ -1,5 +1,5 @@
 ---
-title: Behavior
+title: behavior
 ---
 
 ## Description

@@ -1,5 +1,5 @@
 ---
-title: Uniform Resource Ingest Session
+title: ur_ingest_session
 ---
 
 # ur_ingest_session

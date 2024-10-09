@@ -1,5 +1,5 @@
 ---
-title: Uniform Resource Ingest Session PLM Issue Type
+title: ur_ingest_session_plm_issue_type
 ---
 
 ## Description

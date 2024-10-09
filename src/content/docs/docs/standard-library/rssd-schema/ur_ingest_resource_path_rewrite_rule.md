@@ -1,5 +1,5 @@
 ---
-title: Uniform Resource Ingest Resource Path Rewrite Rule
+title: ur_ingest_resource_path_rewrite_rule
 ---
 
 ## Description

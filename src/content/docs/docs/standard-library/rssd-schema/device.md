@@ -1,5 +1,5 @@
 ---
-title: Device
+title: device
 ---
 
 ## Description

@@ -1,5 +1,5 @@
 ---
-title: Code Notebook State
+title: code_notebook_state
 description: Explanation of the `code_notebook_state` 
 ---
 

@@ -1,5 +1,5 @@
 ---
-title: Device Party Relationship
+title: device_party_relationship
 ---
 
 ## Description

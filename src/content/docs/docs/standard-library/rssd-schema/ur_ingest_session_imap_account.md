@@ -1,5 +1,5 @@
 ---
-title: Uniform Resource Ingest Session IMAP Account
+title: ur_ingest_session_imap_account
 ---
 
 ## Description

@@ -1,5 +1,5 @@
 ---
-title: Uniform Resource Ingest Session UDI-PGP SQL
+title: ur_ingest_session_udi_pgp_sql
 ---
 
 ## Description

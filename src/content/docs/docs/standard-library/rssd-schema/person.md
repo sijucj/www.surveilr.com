@@ -1,5 +1,5 @@
 ---
-title: Person
+title: person
 ---
 
 ## Description
