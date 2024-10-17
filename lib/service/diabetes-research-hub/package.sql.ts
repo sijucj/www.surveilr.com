@@ -4,6 +4,7 @@ import {
   console as c,
   orchestration as orch,
   shell as sh,
+  shell,
   uniformResource as ur,
 } from "../../std/web-ui-content/mod.ts";
 
@@ -28,10 +29,15 @@ export class DrhShellSqlPages extends sh.ShellSqlPages {
   defaultShell() {
     const shellConfig = super.defaultShell();
     shellConfig.title = "Diabetes Research Hub EDGE";
-    shellConfig.image =
-      "https://drh.diabetestechnology.org/images/diabetic-research-hub-logo.png";
+    shellConfig.image = "https://drh.diabetestechnology.org/images/diabetic-research-hub-logo.png";
+    shellConfig.favicon = "https://drh.diabetestechnology.org/_astro/favicon.CcrFY5y9.ico";
     shellConfig.icon = "";
     shellConfig.link = "/";
+    shellConfig.javascript.push("https://cdn.jsdelivr.net/npm/d3@7");
+    shellConfig.javascript.push("https://cdn.jsdelivr.net/npm/@observablehq/plot@0.6");
+    shellConfig.javascript.push("https://app.devl.drh.diabetestechnology.org/js/d3-aide.js");
+    // shellConfig.javascript.push("http://localhost:8080/js/d3-aide.js");
+    shellConfig.javascript.push("/js/chart-component.js"); 
     return shellConfig;
   }
 
@@ -48,8 +54,8 @@ export class DrhShellSqlPages extends sh.ShellSqlPages {
       typeof value === "number"
         ? value
         : value
-        ? this.emitCtx.sqlTextEmitOptions.quotedLiteral(value)[1]
-        : "NULL";
+          ? this.emitCtx.sqlTextEmitOptions.quotedLiteral(value)[1]
+          : "NULL";
     const selectNavMenuItems = (
       rootPath: string,
       caption: string,
@@ -94,7 +100,7 @@ export class DrhShellSqlPages extends sh.ShellSqlPages {
         items.push(selectNavMenuItems("/console", "Console"));
         items.push(
           selectNavMenuItems("/orchestration", "Orchestration"),
-        );        
+        );
         items.push(
           selectNavMenuItems(
             "https://drh.diabetestechnology.org/",
@@ -153,7 +159,7 @@ export class DRHSqlPages extends spn.TypicalSqlPageNotebook {
   `;
   }
 
-  
+
 
   @spn.navigationPrimeTopLevel({
     caption: "DRH EDGE UI Home",
@@ -785,111 +791,32 @@ select
       strftime('Generated: %Y-%m-%d %H:%M:%S', 'now') AS title,
       ' ' AS description
  
+  SELECT    
+    'html' as component,
+      '<input type="hidden" name="participant_id" class="participant_id" value="'|| $participant_id ||'">' as html;      
       
-    select 
+    SELECT 
     'card' as component,    
     2      as columns;
-select 
+ SELECT 
     'GLUCOSE STATISTICS AND TARGETS' as title,
-    '/drh/gluecose-statistics-and-targets/index.sql?_sqlpage_embed&participant_id=' || $participant_id as embed; 
-select 
+    '/drh/gluecose-statistics-and-targets/index.sql?_sqlpage_embed&participant_id=' || $participant_id as embed;         
+SELECT 
     'Goals for Type 1 and Type 2 Diabetes' as title,
     '/drh/goals-for-type-1-and-type-2-diabetes/index.sql?_sqlpage_embed&participant_id=' || $participant_id as embed;
-select 
+SELECT 
     'AMBULATORY GLUCOSE PROFILE (AGP)' as title,
     '/drh/ambulatory-gluecose-profile/index.sql?_sqlpage_embed&participant_id=' || $participant_id as embed;  
+SELECT 
+    'DAILY GLUCOSE PROFILE' as title,
+    '/drh/daily-gluecose-profile/index.sql?_sqlpage_embed&participant_id=' || $participant_id as embed; 
   `;
-  }
+  }   
 
-  @drhNav({
-    caption: "Ambulatory glucose profile embeded page",
-    abbreviatedCaption: "Ambulatory glucose profile embeded page",
-    description: "Ambulatory glucose profile embeded page",
-    siblingOrder: 13,
-  })
-  @spn.shell({ breadcrumbsFromNavStmts: "no",shellStmts:"do-not-include" })
-  "drh/ambulatory-gluecose-profile/index.sql"() {    
-    return this.SQL`    
-    select 
-        'chart'   as component,
-        0         as ymin;
-    select 
-        'p5'              as series,        
-        CASE 
-        WHEN CAST(hour AS INTEGER) = 0 THEN '12 am'
-        WHEN CAST(hour AS INTEGER) = 12 THEN '12 pm'
-        WHEN CAST(hour AS INTEGER) < 12 THEN CAST(hour AS INTEGER) || ' am'
-        ELSE (CAST(hour AS INTEGER) - 12) || ' pm'
-        END AS x,
-        CAST(p5 AS INTEGER)  as value
-    from
-      drh_agp_metrics
-    where
-      participant_id = $participant_id; 
-    select 
-        'p25'              as series,
-        CASE 
-        WHEN CAST(hour AS INTEGER) = 0 THEN '12 am'
-        WHEN CAST(hour AS INTEGER) = 12 THEN '12 pm'
-        WHEN CAST(hour AS INTEGER) < 12 THEN CAST(hour AS INTEGER) || ' am'
-        ELSE (CAST(hour AS INTEGER) - 12) || ' pm'
-        END AS x,
-        CAST(p25 AS INTEGER)  as value
-    from
-      drh_agp_metrics
-    where
-      participant_id = $participant_id; 
-    select 
-        'p50'              as series,
-        CASE 
-        WHEN CAST(hour AS INTEGER) = 0 THEN '12 am'
-        WHEN CAST(hour AS INTEGER) = 12 THEN '12 pm'
-        WHEN CAST(hour AS INTEGER) < 12 THEN CAST(hour AS INTEGER) || ' am'
-        ELSE (CAST(hour AS INTEGER) - 12) || ' pm'
-        END AS x,
-        CAST(p50 AS INTEGER)  as value
-    from
-      drh_agp_metrics
-    where
-      participant_id = $participant_id; 
-    select 
-        'p75'              as series,
-        CASE 
-        WHEN CAST(hour AS INTEGER) = 0 THEN '12 am'
-        WHEN CAST(hour AS INTEGER) = 12 THEN '12 pm'
-        WHEN CAST(hour AS INTEGER) < 12 THEN CAST(hour AS INTEGER) || ' am'
-        ELSE (CAST(hour AS INTEGER) - 12) || ' pm'
-        END AS x,
-        CAST(p75 AS INTEGER)  as value
-    from
-      drh_agp_metrics
-    where
-      participant_id = $participant_id; 
-    select 
-        'p95'              as series,
-        CASE 
-        WHEN CAST(hour AS INTEGER) = 0 THEN '12 am'
-        WHEN CAST(hour AS INTEGER) = 12 THEN '12 pm'
-        WHEN CAST(hour AS INTEGER) < 12 THEN CAST(hour AS INTEGER) || ' am'
-        ELSE (CAST(hour AS INTEGER) - 12) || ' pm'
-        END AS x,
-       CAST(p95 AS INTEGER)  as value
-    from
-      drh_agp_metrics
-    where
-      participant_id = $participant_id; 
-    
-  `;
-  }
-  
-  @drhNav({
-    caption: "Gluecose Statistics and targets embeded page",
-    abbreviatedCaption: "Gluecose Statistics and targets embeded page",
-    description: "Gluecose Statistics and targets embeded page",
-    siblingOrder: 13,
-  })
-  @spn.shell({ breadcrumbsFromNavStmts: "no",shellStmts:"do-not-include" })
-  "drh/gluecose-statistics-and-targets/index.sql"() {    
+ 
+
+  @spn.shell({ breadcrumbsFromNavStmts: "no", shellStmts: "do-not-include" })
+  "drh/gluecose-statistics-and-targets/index.sql"() {
     return this.SQL`
      SELECT  
     'html' as component;
@@ -979,29 +906,234 @@ select
     FROM
       drh_coefficient_of_variation  
     WHERE 
-      participant_id = $participant_id;  
+      participant_id = $participant_id;   
       
     SELECT  
-      '<div class="card-content my-1">Defined as percent coefficient of variation (%CV); target ≤36%</div>' as html;                     
+      '<div class="card-content my-1">Defined as percent coefficient of variation (%CV); target ≤36%</div>' as html;                         
     
   `;
   }
 
-  @drhNav({
-    caption: "Goals for Type 1 and Type 2 Diabetes embeded page",
-    abbreviatedCaption: "Goals for Type 1 and Type 2 Diabetes embeded page",
-    description: "Goals for Type 1 and Type 2 Diabetes embeded page",
-    siblingOrder: 13,
-  })
-  @spn.shell({ breadcrumbsFromNavStmts: "no",shellStmts:"do-not-include" })
-  "drh/goals-for-type-1-and-type-2-diabetes/index.sql"() {    
+
+  @spn.shell({ eliminate: true })
+  "js/chart-component.js"() {
+    return Deno.readTextFileSync("./d3-aide-component.js");
+  }
+
+  @spn.shell({ breadcrumbsFromNavStmts: "no", shellStmts: "do-not-include" })
+  "drh/api/time_range_stacked_metrics/index.sql"() {
     return this.SQL`
-     SELECT  
-    'html' as component;
-    SELECT  
-      '<div class="card-content my-1"></div>' as html; 
+    SELECT 'json' AS component, 
+        JSON_OBJECT(
+            'timeMetrics', (
+                SELECT 
+                    JSON_OBJECT(
+                        'participant_id', participant_id, 
+                        'timeBelowRangeLow', CAST(time_below_range_low_percentage AS INTEGER),                        
+                        'timeBelowRangeVeryLow', CAST(time_below_range_very_low_percentage AS INTEGER),                        
+                        'timeInRange', CAST(time_in_range_percentage AS INTEGER),                        
+                        'timeAboveRangeVeryHigh', CAST(time_above_vh_percentage AS INTEGER),                        
+                        'timeAboveRangeHigh', CAST(time_above_range_high_percentage AS INTEGER)
+                    
+                ) 
+                  FROM
+                    drh_time_range_stacked_metrics
+                  WHERE
+                    participant_id = $participant_id
+            )
+        ) AS contents; 
+  `;
+  } 
+  
+  @spn.shell({ breadcrumbsFromNavStmts: "no", shellStmts: "do-not-include" })
+  "drh/goals-for-type-1-and-type-2-diabetes/index.sql"() {
+    
+     return this.SQL`
+    SELECT 'html' as component,
+    '<div class="chartContainer">
+      <svg id="tir-chart" class="m-0"></svg>
+    </div>
+    ' as html; 
+    `;     
+  
+  }
+
+  @spn.shell({ breadcrumbsFromNavStmts: "no", shellStmts: "do-not-include" })
+  "drh/api/ambulatory-glucose-profile/index.sql"() {
+    return this.SQL`
+    SELECT 'json' AS component, 
+        JSON_OBJECT(
+            'ambulatoryGlucoseProfile', (
+                SELECT JSON_GROUP_ARRAY(
+                    JSON_OBJECT(
+                        'participant_id', participant_id, 
+                        'hour', hour,                        
+                        'p5', p5,                        
+                        'p25', p25,                        
+                        'p50', p50,                        
+                        'p75', p75,                        
+                        'p95', p95                      
+                    )
+                ) 
+                  FROM
+                    drh_agp_metrics
+                  WHERE
+                    participant_id = $participant_id
+            )
+        ) AS contents;
   `;
   }
+
+  @spn.shell({ breadcrumbsFromNavStmts: "no", shellStmts: "do-not-include" })
+  "drh/ambulatory-gluecose-profile/index.sql"() {
+
+    return this.SQL`
+    SELECT 'html' as component,
+    '<div id="agp-chart-ctr">
+        <svg id="agp-chart"></svg> 
+    </div> 
+    ' as html;
+    `;
+
+  }
+
+  @spn.shell({ breadcrumbsFromNavStmts: "no", shellStmts: "do-not-include" })
+  "drh/api/daily-glcuose-profile/index.sql"() {
+    return this.SQL`
+    SELECT 'json' AS component, 
+        JSON_OBJECT(
+            'daily_glucose_profile', (
+                SELECT JSON_GROUP_ARRAY(
+                    JSON_OBJECT(
+                        'date_time', Date_Time, 
+                        'date', strftime('%Y-%m-%d', Date_Time), 
+                        'hour', strftime('%H', Date_Time),                        
+                        'glucose', CGM_Value                     
+                    )
+                ) 
+                  FROM
+                    combined_cgm_tracing
+                  WHERE
+                    participant_id = $participant_id
+            )
+        ) AS contents;   
+  `;
+  } 
+
+  @spn.shell({ breadcrumbsFromNavStmts: "no", shellStmts: "do-not-include" })
+  "drh/daily-gluecose-profile/index.sql"() {
+    return this.SQL`
+    SELECT 'html' as component,
+        '<style>
+    .line {
+        fill: none;
+        stroke: lightgrey;
+        stroke-width: 1px;
+    }
+
+    .highlight-area {
+        fill: lightgreen;
+        opacity: 1;
+    }
+
+    .highlight-line {
+        fill: none;
+        stroke: green;
+        stroke-width: 1px;
+    }
+
+    .highlight-glucose-h-line {
+        fill: none;
+        stroke: orange;
+        stroke-width: 1px;
+    }
+
+    .highlight-glucose-l-line {
+        fill: none;
+        stroke: red;
+        stroke-width: 1px;
+    }
+
+    .reference-line {
+        stroke: black;
+        stroke-width: 1px;
+    }
+
+    .vertical-line {
+        stroke: rgb(223, 223, 223);
+        stroke-width: 1px;
+    }
+
+    .day-label {
+        font-size: 10px;
+        fill: #000;
+    }
+
+    .day-label-top {
+        font-size: 12px;
+        text-anchor: middle;
+        fill: #000;
+    }
+
+    .axis path,
+    .axis line {
+        fill: none;
+        shape-rendering: crispEdges;
+    }
+
+    .mg-dl-label {
+        font-size: 14px;
+        font-weight: bold;
+        text-anchor: middle;
+        fill: #000;
+        transform: rotate(-90deg);
+        transform-origin: left center;
+    }
+
+    .horizontal-line {
+        stroke: rgb(223, 223, 223);
+        stroke-width: 1px;
+    }
+</style>  
+        <div id="daily-gp1"> 
+            <svg id="dgp-wk1"></svg>
+        </div>
+        <div id="daily-gp2" class="mt-4">
+            <svg id="dgp-wk2"></svg>
+        </div>
+        <p class="py-2 px-4 text-gray-800 font-normal text-xs hidden" id="dgp-note"><b>NOTE:</b> The Daily Glucose
+            Profile
+            plots the glucose levels of the last 14 days.</p>
+    ' as html;
+    `; 
+  }
+
+  @spn.shell({ breadcrumbsFromNavStmts: "no", shellStmts: "do-not-include" })
+  "drh/api/glycemic_risk_indicator/index.sql"() {
+    return this.SQL`
+    SELECT 'json' AS component, 
+        JSON_OBJECT(
+            'glycemicRiskIndicator', (
+                SELECT JSON_GROUP_ARRAY(
+                    JSON_OBJECT(
+                        'time_above_VH_percentage', time_above_VH_percentage, 
+                        'time_above_H_percentage', time_above_H_percentage, 
+                        'time_in_range_percentage', time_in_range_percentage,                        
+                        'time_below_low_percentage', time_below_low_percentage,                     
+                        'time_below_VL_percentage', time_below_VL_percentage,                     
+                        'Hypoglycemia_Component', Hypoglycemia_Component,                     
+                        'Hyperglycemia_Component', Hyperglycemia_Component,                     
+                        'GRI', GRI                     
+                    )
+                ) 
+                  FROM
+                    drh_glycemic_risk_indicator
+                  WHERE
+                    participant_id = $participant_id 
+            )
+        ) AS contents;   
+  `;
+  } 
 
   @drhNav({
     caption: "Study Participant Dashboard",
@@ -1287,8 +1419,8 @@ export async function drhSQL() {
           import.meta.resolve("./stateless.sql"),
         );
       }
-      
-      
+
+
     }(),
     // new sh.ShellSqlPages(),
     new DrhShellSqlPages(),
