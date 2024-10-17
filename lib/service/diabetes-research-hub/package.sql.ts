@@ -37,7 +37,7 @@ export class DrhShellSqlPages extends sh.ShellSqlPages {
     shellConfig.javascript.push("https://cdn.jsdelivr.net/npm/@observablehq/plot@0.6");
     shellConfig.javascript.push("https://app.devl.drh.diabetestechnology.org/js/d3-aide.js");
     // shellConfig.javascript.push("http://localhost:8080/js/d3-aide.js");
-    shellConfig.javascript.push("/js/chart-component.js"); 
+    shellConfig.javascript.push("/js/chart-component.js");
     return shellConfig;
   }
 
@@ -798,7 +798,7 @@ select
     SELECT 
     'card' as component,    
     2      as columns;
- SELECT 
+ /* SELECT 
     'GLUCOSE STATISTICS AND TARGETS' as title,
     '/drh/gluecose-statistics-and-targets/index.sql?_sqlpage_embed&participant_id=' || $participant_id as embed;         
 SELECT 
@@ -809,11 +809,14 @@ SELECT
     '/drh/ambulatory-gluecose-profile/index.sql?_sqlpage_embed&participant_id=' || $participant_id as embed;  
 SELECT 
     'DAILY GLUCOSE PROFILE' as title,
-    '/drh/daily-gluecose-profile/index.sql?_sqlpage_embed&participant_id=' || $participant_id as embed; 
+    '/drh/daily-gluecose-profile/index.sql?_sqlpage_embed&participant_id=' || $participant_id as embed;  */ 
+SELECT 
+    'Glycemia Risk Index' as title,
+    '/drh/glycemic_risk_indicator/index.sql?_sqlpage_embed&participant_id=' || $participant_id as embed;  
   `;
-  }   
+  }
 
- 
+
 
   @spn.shell({ breadcrumbsFromNavStmts: "no", shellStmts: "do-not-include" })
   "drh/gluecose-statistics-and-targets/index.sql"() {
@@ -943,19 +946,19 @@ SELECT
             )
         ) AS contents; 
   `;
-  } 
-  
+  }
+
   @spn.shell({ breadcrumbsFromNavStmts: "no", shellStmts: "do-not-include" })
   "drh/goals-for-type-1-and-type-2-diabetes/index.sql"() {
-    
-     return this.SQL`
+
+    return this.SQL`
     SELECT 'html' as component,
     '<div class="chartContainer">
       <svg id="tir-chart" class="m-0"></svg>
     </div>
     ' as html; 
-    `;     
-  
+    `;
+
   }
 
   @spn.shell({ breadcrumbsFromNavStmts: "no", shellStmts: "do-not-include" })
@@ -1018,7 +1021,7 @@ SELECT
             )
         ) AS contents;   
   `;
-  } 
+  }
 
   @spn.shell({ breadcrumbsFromNavStmts: "no", shellStmts: "do-not-include" })
   "drh/daily-gluecose-profile/index.sql"() {
@@ -1105,7 +1108,7 @@ SELECT
             Profile
             plots the glucose levels of the last 14 days.</p>
     ' as html;
-    `; 
+    `;
   }
 
   @spn.shell({ breadcrumbsFromNavStmts: "no", shellStmts: "do-not-include" })
@@ -1114,8 +1117,7 @@ SELECT
     SELECT 'json' AS component, 
         JSON_OBJECT(
             'glycemicRiskIndicator', (
-                SELECT JSON_GROUP_ARRAY(
-                    JSON_OBJECT(
+                SELECT JSON_OBJECT(
                         'time_above_VH_percentage', time_above_VH_percentage, 
                         'time_above_H_percentage', time_above_H_percentage, 
                         'time_in_range_percentage', time_in_range_percentage,                        
@@ -1123,8 +1125,7 @@ SELECT
                         'time_below_VL_percentage', time_below_VL_percentage,                     
                         'Hypoglycemia_Component', Hypoglycemia_Component,                     
                         'Hyperglycemia_Component', Hyperglycemia_Component,                     
-                        'GRI', GRI                     
-                    )
+                        'GRI', GRI
                 ) 
                   FROM
                     drh_glycemic_risk_indicator
@@ -1133,7 +1134,47 @@ SELECT
             )
         ) AS contents;   
   `;
-  } 
+  }
+
+  @spn.shell({ breadcrumbsFromNavStmts: "no", shellStmts: "do-not-include" })
+  "drh/glycemic_risk_indicator/index.sql"() {
+    return this.SQL`
+    SELECT 'html' as component,
+        '<style>
+        svg {
+          display: block;
+          margin: auto;
+        }
+      </style>
+        <svg class="gri-chart hidden"></svg>' as html; 
+      SELECT '
+        <table class="w-full text-center border">
+        <thead>
+          <tr class="bg-gray-900">
+            <th >TIR</th>
+            <th >TAR(VH)</th>
+            <th >TAR(H)</th>
+            <th >TBR(L)</th>
+            <th >TBR(VL)</th>
+            <th >TITR</th>
+            <th >GRI</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="TIR"></td>
+            <td class="TAR_VH"></td>
+            <td class="TAR_H"></td>
+            <td class="TBR_L"></td>
+            <td class="TBR_VL"></td>
+            <td class="timeInTightRangeCdata"></td>
+            <td class="GRI"></td>
+          </tr>
+        </tbody> 
+      </table>
+    ' as html; 
+    `;
+  }
 
   @drhNav({
     caption: "Study Participant Dashboard",
