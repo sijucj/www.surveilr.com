@@ -35,9 +35,8 @@ export class DrhShellSqlPages extends sh.ShellSqlPages {
     shellConfig.link = "/";
     shellConfig.javascript.push("https://cdn.jsdelivr.net/npm/d3@7");
     shellConfig.javascript.push("https://cdn.jsdelivr.net/npm/@observablehq/plot@0.6");
-    shellConfig.javascript.push("https://app.devl.drh.diabetestechnology.org/js/d3-aide.js");
-    // shellConfig.javascript.push("http://localhost:8080/js/d3-aide.js");
-    shellConfig.javascript.push("/js/chart-component.js");
+    shellConfig.javascript.push("https://app.devl.drh.diabetestechnology.org/js/d3-aide.js");    
+    shellConfig.javascript.push("/js/chart-component.js"); 
     return shellConfig;
   }
 
@@ -798,7 +797,7 @@ select
     SELECT 
     'card' as component,    
     2      as columns;
- /* SELECT 
+ SELECT 
     'GLUCOSE STATISTICS AND TARGETS' as title,
     '/drh/gluecose-statistics-and-targets/index.sql?_sqlpage_embed&participant_id=' || $participant_id as embed;         
 SELECT 
@@ -809,14 +808,16 @@ SELECT
     '/drh/ambulatory-gluecose-profile/index.sql?_sqlpage_embed&participant_id=' || $participant_id as embed;  
 SELECT 
     'DAILY GLUCOSE PROFILE' as title,
-    '/drh/daily-gluecose-profile/index.sql?_sqlpage_embed&participant_id=' || $participant_id as embed;  */ 
+    '/drh/daily-gluecose-profile/index.sql?_sqlpage_embed&participant_id=' || $participant_id as embed;  
 SELECT 
     'Glycemia Risk Index' as title,
     '/drh/glycemic_risk_indicator/index.sql?_sqlpage_embed&participant_id=' || $participant_id as embed;  
+SELECT 
+    '' as title,
+    '/drh/advanced_metrics/index.sql?_sqlpage_embed&participant_id=' || $participant_id as embed;  
   `;
   }
-
-
+  
 
   @spn.shell({ breadcrumbsFromNavStmts: "no", shellStmts: "do-not-include" })
   "drh/gluecose-statistics-and-targets/index.sql"() {
@@ -920,7 +921,7 @@ SELECT
 
   @spn.shell({ eliminate: true })
   "js/chart-component.js"() {
-    return Deno.readTextFileSync("./d3-aide-component.js");
+    return Deno.readTextFileSync("./d3-aide-component.js");    
   }
 
   @spn.shell({ breadcrumbsFromNavStmts: "no", shellStmts: "do-not-include" })
@@ -1174,6 +1175,50 @@ SELECT
       </table>
     ' as html; 
     `;
+  }
+
+  @spn.shell({ breadcrumbsFromNavStmts: "no", shellStmts: "do-not-include" })
+  "drh/api/advanced_metrics/index.sql"() {
+    return this.SQL`
+    SELECT 'json' AS component, 
+        JSON_OBJECT(
+            'advancedMetrics', (
+                SELECT JSON_OBJECT(
+                        'time_in_tight_range_percentage', round(time_in_tight_range_percentage,3) 
+                ) 
+                  FROM 
+                    drh_advanced_metrics
+                  WHERE
+                    participant_id = $participant_id 
+            )
+        ) AS contents;   
+  `;
+  } 
+
+  @spn.shell({ breadcrumbsFromNavStmts: "no", shellStmts: "do-not-include" })
+  "drh/advanced_metrics/index.sql"() {
+    return this.SQL`
+     SELECT  
+    'html' as component;
+    SELECT  
+      '<div class="card-content my-3 border-bottom">Liability Index <span style="float: right;">'|| liability_index ||' mg/dL</span></div>
+      <div class="card-content my-3 border-bottom">Hypoglycemic Episodes <span style="float: right;">'|| hypoglycemic_episodes ||'</span></div>
+      <div class="card-content my-3 border-bottom">Euglycemic Episodes <span style="float: right;">'|| euglycemic_episodes ||'</span></div>
+      <div class="card-content my-3 border-bottom">Hyperglycemic Episodes <span style="float: right;">'|| hyperglycemic_episodes ||'</span></div>
+      <div class="card-content my-3 border-bottom">M Value <span style="float: right;">'|| m_value ||' mg/dL</span></div>
+      <div class="card-content my-3 border-bottom">Mean Amplitude <span style="float: right;">'|| mean_amplitude ||'</span></div>
+      <div class="card-content my-3 border-bottom">Average Daily Risk Range <span style="float: right;">'|| average_daily_risk ||' mg/dL</span></div>
+      <div class="card-content my-3 border-bottom">J Index <span style="float: right;">'|| j_index ||' mg/dL</span></div>
+      <div class="card-content my-3 border-bottom">Low Blood Glucose Index <span style="float: right;">'|| lbgi ||'</span></div>
+      <div class="card-content my-3 border-bottom">High Blood Glucose Index <span style="float: right;">'|| hbgi ||'</span></div>
+      <div class="card-content my-3 border-bottom">Glycaemic Risk Assessment Diabetes Equation (GRADE) <span style="float: right;">'|| avg_risk_score ||'</span></div>
+      <div class="card-content my-3 border-bottom">Continuous Overall Net Glycemic Action (CONGA) <span style="float: right;">349</span></div>
+      <div class="card-content my-3 border-bottom">Mean of Daily Differences <span style="float: right;">'|| mean_daily_diff ||'</span></div>' as html                            
+    FROM 
+      drh_advanced_metrics
+    WHERE
+      participant_id = $participant_id   
+  `;
   }
 
   @drhNav({
