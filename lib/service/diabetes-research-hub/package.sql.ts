@@ -811,12 +811,12 @@ SELECT
     '/drh/daily-gluecose-profile/index.sql?_sqlpage_embed&participant_id=' || $participant_id as embed;  
 SELECT 
     'Glycemia Risk Index' as title,
-    '/drh/glycemic_risk_indicator/index.sql?_sqlpage_embed&participant_id=' || $participant_id as embed;  
+    '/drh/glycemic_risk_indicator/index.sql?_sqlpage_embed&participant_id=' || $participant_id as embed; 
 SELECT 
     '' as title,
     '/drh/advanced_metrics/index.sql?_sqlpage_embed&participant_id=' || $participant_id as embed;  
   `;
-  }
+  }     
   
 
   @spn.shell({ breadcrumbsFromNavStmts: "no", shellStmts: "do-not-include" })
@@ -1205,19 +1205,19 @@ SELECT
       <div class="card-content my-3 border-bottom">Hypoglycemic Episodes <span style="float: right;">'|| hypoglycemic_episodes ||'</span></div>
       <div class="card-content my-3 border-bottom">Euglycemic Episodes <span style="float: right;">'|| euglycemic_episodes ||'</span></div>
       <div class="card-content my-3 border-bottom">Hyperglycemic Episodes <span style="float: right;">'|| hyperglycemic_episodes ||'</span></div>
-      <div class="card-content my-3 border-bottom">M Value <span style="float: right;">'|| m_value ||' mg/dL</span></div>
-      <div class="card-content my-3 border-bottom">Mean Amplitude <span style="float: right;">'|| mean_amplitude ||'</span></div>
-      <div class="card-content my-3 border-bottom">Average Daily Risk Range <span style="float: right;">'|| average_daily_risk ||' mg/dL</span></div>
+      <div class="card-content my-3 border-bottom">M Value <span style="float: right;">'|| round(m_value,3) ||' mg/dL</span></div> 
+      <div class="card-content my-3 border-bottom">Mean Amplitude <span style="float: right;">'|| round(mean_amplitude,3) ||'</span></div>
+      <div class="card-content my-3 border-bottom">Average Daily Risk Range <span style="float: right;">'|| round(average_daily_risk,3) ||' mg/dL</span></div>
       <div class="card-content my-3 border-bottom">J Index <span style="float: right;">'|| j_index ||' mg/dL</span></div>
       <div class="card-content my-3 border-bottom">Low Blood Glucose Index <span style="float: right;">'|| lbgi ||'</span></div>
-      <div class="card-content my-3 border-bottom">High Blood Glucose Index <span style="float: right;">'|| hbgi ||'</span></div>
-      <div class="card-content my-3 border-bottom">Glycaemic Risk Assessment Diabetes Equation (GRADE) <span style="float: right;">'|| avg_risk_score ||'</span></div>
-      <div class="card-content my-3 border-bottom">Continuous Overall Net Glycemic Action (CONGA) <span style="float: right;">349</span></div>
-      <div class="card-content my-3 border-bottom">Mean of Daily Differences <span style="float: right;">'|| mean_daily_diff ||'</span></div>' as html                            
-    FROM 
-      drh_advanced_metrics
+      <div class="card-content my-3 border-bottom">High Blood Glucose Index <span style="float: right;">'|| hbgi ||'</span></div> 
+      <div class="card-content my-3 border-bottom">Glycaemic Risk Assessment Diabetes Equation (GRADE) <span style="float: right;">'|| round(avg_risk_score,3) ||'</span></div>
+      <div class="card-content my-3 border-bottom">Continuous Overall Net Glycemic Action (CONGA) <span style="float: right;">'|| round(conga_hourly,3) ||'</span></div>
+      <div class="card-content my-3 border-bottom">Mean of Daily Differences <span style="float: right;">'|| round(mean_daily_diff,3) ||'</span></div>' as html                            
+    FROM  
+      drh_advanced_metrics   
     WHERE
-      participant_id = $participant_id   
+      participant_id = $participant_id      
   `;
   }
 
@@ -1235,7 +1235,7 @@ SELECT
 
 
   SELECT
-  'datagrid' AS component;
+  'datagrid' AS component; 
 
   SELECT
       'Study Name' AS title,
