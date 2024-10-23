@@ -797,7 +797,7 @@ select
     SELECT 
     'card' as component,    
     2      as columns;
- SELECT 
+SELECT 
     'GLUCOSE STATISTICS AND TARGETS' as title,
     '/drh/gluecose-statistics-and-targets/index.sql?_sqlpage_embed&participant_id=' || $participant_id as embed;         
 SELECT 
@@ -812,7 +812,7 @@ SELECT
 SELECT 
     'Glycemia Risk Index' as title,
     '/drh/glycemic_risk_indicator/index.sql?_sqlpage_embed&participant_id=' || $participant_id as embed; 
-SELECT 
+ SELECT 
     '' as title,
     '/drh/advanced_metrics/index.sql?_sqlpage_embed&participant_id=' || $participant_id as embed;  
   `;
@@ -993,7 +993,12 @@ SELECT
 
     return this.SQL`
     SELECT 'html' as component,
-    '<div id="agp-chart-ctr">
+    '<style>
+        .text-\\[11px\\] { 
+            font-size: 11px;  
+        }
+    </style>  
+    <div id="agp-chart-ctr">
         <svg id="agp-chart"></svg> 
     </div> 
     ' as html;
